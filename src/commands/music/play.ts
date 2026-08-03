@@ -4,8 +4,9 @@ import { ExtendedClient } from '../../structures/ExtendedClient';
 import { spawn } from 'child_process';
 import { resolve } from 'path';
 
-const YTDLP_PATH = resolve(__dirname, '../../../node_modules/youtube-dl-exec/bin/yt-dlp.exe');
+const { constants: ytdlConstants } = require('youtube-dl-exec');
 
+const YTDLP_PATH = ytdlConstants.YOUTUBE_DL_PATH;
 // Check if query is a YouTube URL
 function isYouTubeURL(query: string): boolean {
     return /(?:youtube\.com|youtu\.be|music\.youtube\.com)/.test(query);

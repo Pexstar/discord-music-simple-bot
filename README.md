@@ -45,12 +45,12 @@ Anda bisa meng-host bot ini langsung dari saku Anda menggunakan HP Android!
 3. **Clone Repository ini:**
    ```bash
    git clone <URL_GITHUB_ANDA>
-   cd discord-music
+   cd discord-music-simple-bot
    ```
 4. **Install Dependencies:**
-   Disarankan menambahkan flag `--no-optional` agar NPM melewati instalasi modul `ffmpeg-static` yang tidak cocok untuk arsitektur Termux/Android. (Bot otomatis akan mendeteksi dan menggunakan `ffmpeg` bawaan sistem yang diinstall pada langkah 2).
+   Jalankan perintah di bawah ini. (Jika muncul pesan error merah tentang `ffmpeg-static` saat proses install, abaikan saja karena itu wajar di Termux dan instalasi akan tetap dilanjutkan).
    ```bash
-   npm install --no-optional
+   npm install
    ```
 5. **Siapkan File .env:**
    ```bash
@@ -70,6 +70,6 @@ Sistem operasi HP (Xiaomi, Oppo, Vivo, Samsung, dll) biasanya membunuh aplikasi 
 
 ### 🔧 Troubleshooting Termux
 - **Error Instalasi Modul / Exec format error:**
-  Pastikan Anda menggunakan perintah `npm install --no-optional`. Karena dependensi seperti `ffmpeg-static` ditujukan untuk arsitektur desktop PC. Bot telah dikonfigurasi untuk **langsung beradaptasi** menggunakan `ffmpeg` dari Termux Anda jika dijalankan di Android.
+  Pastikan Anda menjalankan `npm install` biasa. Meskipun muncul pesan gagal di modul `ffmpeg-static`, instalasi paket lain akan tetap berlanjut (karena kita sudah menjadikannya *optional*). Bot akan **langsung beradaptasi** menggunakan `ffmpeg` dari Termux Anda jika dijalankan di Android.
 - **Tidak dapat menemukan yt-dlp:**
   Pastikan instalasi `youtube-dl-exec` berhasil. Bot tidak lagi melakukan *hardcode* pada file `yt-dlp.exe` milik Windows, melainkan otomatis menggunakan binary Linux/Termux bawaan package.

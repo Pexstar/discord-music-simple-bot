@@ -10,6 +10,28 @@ Bot Discord Music super stabil dan responsif, dibangun dengan Node.js, TypeScrip
 
 ---
 
+## 🔑 Cara Mendapatkan Token & Client ID Bot
+Sebelum menjalankan bot, Anda perlu mendaftarkannya di Discord Developer Portal:
+1. Buka [Discord Developer Portal](https://discord.com/developers/applications) dan login.
+2. Klik tombol **New Application** di pojok kanan atas, beri nama bot Anda, lalu klik **Create**.
+3. **Mendapatkan Client ID:**
+   - Di menu **General Information**, temukan/copy **Application ID**. Ini adalah `CLIENT_ID` Anda.
+   - *(Note: `GUILD_ID` adalah ID Server Discord Anda. Anda bisa mendapatkannya dengan mengaktifkan Developer Mode di seting aplikasi Discord, lalu klik kanan nama server > Copy Server ID. **Anda juga bisa mengosongkan `GUILD_ID` di file `.env`** jika ingin bot Anda bersifat global dan bisa digunakan di banyak server sekaligus).*
+4. **Mendapatkan Token:**
+   - Masuk ke menu **Bot** (panel kiri).
+   - Klik **Reset Token** untuk memunculkan token. **Copy dan simpan rahasia token ini**. Ini adalah `DISCORD_TOKEN` Anda.
+5. **Mengaktifkan Privileged Intents (Penting!):**
+   - Masih di halaman **Bot**, scroll ke bawah ke bagian **Privileged Gateway Intents**.
+   - Wajib nyalakan **Message Content Intent** (dan opsi lainnya jika diperlukan).
+   - Klik **Save Changes**.
+6. **Mengundang Bot ke Server Anda:**
+   - Masuk ke menu **OAuth2 > URL Generator**.
+   - Di bagian Scopes, centang **bot** dan **applications.commands**.
+   - Di bagian Bot Permissions, centang **Send Messages**, **Connect**, dan **Speak**.
+   - Copy URL yang dihasilkan di bagian bawah, buka URL tersebut di tab browser baru, lalu undang bot ke server Anda!
+
+---
+
 ## 💻 Cara Menjalankan di PC (Windows / Linux / MacOS)
 
 1. **Install Node.js** (Minimal versi 18+)

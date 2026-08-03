@@ -11,9 +11,20 @@ import {
 import { GuildMember, TextChannel } from 'discord.js';
 import { spawn } from 'child_process';
 import { resolve } from 'path';
+import os from 'os';
 
-const YTDLP_PATH = resolve(__dirname, '../../node_modules/youtube-dl-exec/bin/yt-dlp.exe');
-const FFMPEG_PATH = require('ffmpeg-static') as string;
+const { constants: ytdlConstants } = require('youtube-dl-exec');
+const YTDLP_PATH = ytdlConstants.YOUTUBE_DL_PATH;
+
+let FFMPEG_PATH = 'ffmpeg';
+if (os.platform() !== 'android') {
+    try {
+        const ffmpegStatic = require('ffmpeg-static');
+        if (ffmpegStatic) FFMPEG_PATH = ffmpegStatic;
+    } catch (e) {
+        // Fallback to system ffmpeg
+    }
+}
 
 export interface Track {
     url: string;
@@ -82,7 +93,7 @@ export class MusicQueue {
         if (this.tracks.length === 0) {
             this.currentTrack = null;
             
-            if (this.textChannel) {
+            if (!this.autoplay && this.textChannel) {
                 this.textChannel.send('⏹️ Antrian habis. Bot akan keluar dari voice channel jika tidak ada aktivitas.');
             }
             return;
@@ -222,44 +233,62 @@ export class MusicQueue {
                 videoId = match[1];
             }
 
-            let args: string[];
-            if (videoId) {
-                // Use YouTube's official Mix playlist for this video to get highly accurate related songs
-                const mixUrl = `https://www.youtube.com/watch?v=${videoId}&list=RD${videoId}`;
-                // Fetch items 2 to 6 from the mix (item 1 is usually the original video)
-                args = ['--print', '%(webpage_url)s|%(title)s|%(channel)s', '--playlist-items', '2-6', mixUrl];
-            } else {
-                // Fallback to title search if not a youtube URL
-                const query = `ytsearch5: ${this.lastTrack.title} mix`;
-                args = ['--print', '%(webpage_url)s|%(title)s|%(channel)s', '--no-playlist', query];
-            }
-            
-            const proc = spawn(YTDLP_PATH, args, { stdio: ['pipe', 'pipe', 'pipe'] });
-            let stdout = '';
-            
-            proc.stdout.on('data', (d) => stdout += d.toString());
-            
-            proc.on('close', (code) => {
-                if (code === 0 && stdout.trim()) {
-                    const lines = stdout.trim().split('\n').filter(line => line.trim().length > 0);
-                    
-                    let filtered = lines.filter(line => !line.includes(this.lastTrack!.url));
-                    if (filtered.length === 0) filtered = lines;
-                    
-                    const randomLine = filtered[Math.floor(Math.random() * filtered.length)];
-                    if (randomLine) {
-                        const [url, title, author] = randomLine.split('|');
-                        // Add directly to tracks array without triggering playNext since we are already playing
-                        // Silent addition as requested
-                        this.tracks.push({
-                            url: url,
-                            title: title || 'Unknown',
-                            author: author || 'Unknown',
-                            requestedBy: 'Autoplay'
-                        });
+            const attemptFetch = (args: string[], fallbackArgs?: string[]) => {
+                const proc = spawn(YTDLP_PATH, args, { stdio: ['pipe', 'pipe', 'pipe'] });
+                let stdout = '';
+                
+                proc.stdout.on('data', (d) => stdout += d.toString());
+                
+                proc.on('close', () => {
+                    if (stdout.trim()) {
+                        const lines = stdout.trim().split('\n').filter(line => line.trim().length > 0);
+                        
+                        let filtered = lines.filter(line => !line.includes(this.lastTrack!.url));
+                        if (filtered.length === 0) filtered = lines;
+                        
+                        const randomLine = filtered[Math.floor(Math.random() * filtered.length)];
+                        if (randomLine) {
+                            const [url, title, author] = randomLine.split('|');
+                            this.tracks.push({
+                                url: url,
+                                title: title || 'Unknown',
+                                author: author || 'Unknown',
+                                requestedBy: 'Autoplay'
+                            });
+                            
+                            // If player is idle (meaning the current track finished while we were fetching), start playing immediately!
+                            if (this.player.state.status === AudioPlayerStatus.Idle) {
+                                this.playNext();
+                            }
+                            return;
+                        }
                     }
-                }
-            });
+                    
+                    // If we reach here, no track was found in this attempt
+                    if (fallbackArgs) {
+                        attemptFetch(fallbackArgs);
+                    } else if (this.player.state.status === AudioPlayerStatus.Idle) {
+                        // All attempts failed and player is idle
+                        if (this.textChannel) {
+                            this.textChannel.send('⏹️ Autoplay gagal menemukan lagu terkait. Antrian habis.');
+                        }
+                        this.autoplay = false;
+                    }
+                });
+            };
+
+            const query = `ytsearch5: ${this.lastTrack.title} audio`;
+            const fallbackArgs = ['--print', '%(webpage_url)s|%(title)s|%(channel)s', '--no-playlist', query];
+            
+            if (videoId) {
+                // Try YouTube Mix first
+                const mixUrl = `https://www.youtube.com/watch?v=${videoId}&list=RD${videoId}`;
+                const args = ['--print', '%(webpage_url)s|%(title)s|%(channel)s', '--playlist-items', '2-6', mixUrl];
+                attemptFetch(args, fallbackArgs);
+            } else {
+                // Not a youtube URL or no video ID, fallback to ytsearch directly
+                attemptFetch(fallbackArgs);
+            }
         } catch (e) {
             console.error('[Autoplay Fetch Error]', e);
         }

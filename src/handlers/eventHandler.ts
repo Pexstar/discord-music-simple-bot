@@ -1,8 +1,21 @@
 import { ExtendedClient } from '../structures/ExtendedClient';
+import { ActivityType } from 'discord.js';
 
 export const loadEvents = (client: ExtendedClient) => {
     client.once('ready', async () => {
         console.log(`Logged in as ${client.user?.tag}!`);
+
+        const activities = [
+            { name: '🎵 /play to listen to music', type: ActivityType.Custom },
+            { name: '🎶 Autoplay 24/7 Enabled!', type: ActivityType.Custom },
+            { name: '📻 /help for commands', type: ActivityType.Custom }
+        ];
+
+        let i = 0;
+        setInterval(() => {
+            const activity = activities[i++ % activities.length];
+            client.user?.setActivity(activity);
+        }, 15000); // Changes every 15 seconds
     });
 
     client.on('interactionCreate', async (interaction) => {

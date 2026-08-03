@@ -48,10 +48,10 @@ Anda bisa meng-host bot ini langsung dari saku Anda menggunakan HP Android!
    cd discord-music
    ```
 4. **Install Dependencies:**
+   Disarankan menambahkan flag `--no-optional` agar NPM melewati instalasi modul `ffmpeg-static` yang tidak cocok untuk arsitektur Termux/Android. (Bot otomatis akan mendeteksi dan menggunakan `ffmpeg` bawaan sistem yang diinstall pada langkah 2).
    ```bash
-   npm install
+   npm install --no-optional
    ```
-   *(Catatan: Termux secara pintar akan mencocokkan arsitektur HP Anda seperti ARM64 / x86 untuk `yt-dlp` dan `ffmpeg` otomatis).*
 5. **Siapkan File .env:**
    ```bash
    cp .env.example .env
@@ -67,3 +67,9 @@ Anda bisa meng-host bot ini langsung dari saku Anda menggunakan HP Android!
 Sistem operasi HP (Xiaomi, Oppo, Vivo, Samsung, dll) biasanya membunuh aplikasi di latar belakang untuk menghemat baterai. Agar bot tetap hidup 24/7 di Termux walau layar dimatikan:
 - Matikan fitur **Battery Optimization** untuk aplikasi Termux.
 - Kunci (*Lock*) aplikasi Termux di *Recent Apps*.
+
+### 🔧 Troubleshooting Termux
+- **Error Instalasi Modul / Exec format error:**
+  Pastikan Anda menggunakan perintah `npm install --no-optional`. Karena dependensi seperti `ffmpeg-static` ditujukan untuk arsitektur desktop PC. Bot telah dikonfigurasi untuk **langsung beradaptasi** menggunakan `ffmpeg` dari Termux Anda jika dijalankan di Android.
+- **Tidak dapat menemukan yt-dlp:**
+  Pastikan instalasi `youtube-dl-exec` berhasil. Bot tidak lagi melakukan *hardcode* pada file `yt-dlp.exe` milik Windows, melainkan otomatis menggunakan binary Linux/Termux bawaan package.

@@ -37,7 +37,7 @@ Before running the bot, you need to register it on the Discord Developer Portal:
 1. **Install Node.js** (Minimum version 18+)
 2. **Clone this Repository:**
    ```bash
-   git clone <YOUR_GITHUB_URL>
+   git clone https://github.com/Pexstar/discord-music-simple-bot.git
    cd discord-music-simple-bot
    ```
 3. **Install Dependencies:**
@@ -66,7 +66,7 @@ You can host this bot right from your pocket using an Android phone!
    ```
 3. **Clone this Repository:**
    ```bash
-   git clone <YOUR_GITHUB_URL>
+   git clone https://github.com/Pexstar/discord-music-simple-bot.git
    cd discord-music-simple-bot
    ```
 4. **Install Dependencies:**

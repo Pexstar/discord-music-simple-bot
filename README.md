@@ -38,7 +38,7 @@ Before running the bot, you need to register it on the Discord Developer Portal:
 2. **Clone this Repository:**
    ```bash
    git clone <YOUR_GITHUB_URL>
-   cd discord-music
+   cd discord-music-simple-bot
    ```
 3. **Install Dependencies:**
    ```bash

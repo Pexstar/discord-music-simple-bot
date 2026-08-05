@@ -4,17 +4,20 @@ import { ExtendedClient } from '../../structures/ExtendedClient';
 
 const command: Command = {
     data: new SlashCommandBuilder()
-        .setName('volume')
-        .setDescription('Set the volume of the music player')
+        .setName('loop')
+        .setDescription('Toggle repeat mode')
         .addIntegerOption(option => 
-            option.setName('amount')
-                .setDescription('Volume amount (1-200)')
-                .setMinValue(1)
-                .setMaxValue(200)
+            option.setName('mode')
+                .setDescription('Loop mode')
                 .setRequired(true)
+                .addChoices(
+                    { name: 'Off', value: 0 },
+                    { name: 'Track', value: 1 },
+                    { name: 'Queue', value: 2 }
+                )
         ),
     async execute(interaction) {
-        const amount = interaction.options.getInteger('amount', true);
+        const mode = interaction.options.getInteger('mode', true) as 0 | 1 | 2;
         const member = interaction.member as GuildMember;
 
         if (!member.voice.channel) {
@@ -30,8 +33,10 @@ const command: Command = {
             return;
         }
 
-        queue.setVolume(amount);
-        await interaction.reply({ embeds: [new EmbedBuilder().setColor('#9000FF').setDescription(`🔊 Volume diatur ke **${amount}%**.`)] });
+        queue.loopMode = mode;
+        const modeName = mode === 0 ? 'Off' : (mode === 1 ? 'Track' : 'Queue');
+        
+        await interaction.reply({ embeds: [new EmbedBuilder().setColor('#9000FF').setDescription(`🔁 Loop mode changed to: **${modeName}**`)] });
     },
 };
 

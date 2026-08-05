@@ -4,19 +4,19 @@ import { Command } from '../../structures/Command';
 const command: Command = {
     data: new SlashCommandBuilder()
         .setName('avatar')
-        .setDescription('Tampilkan avatar user')
+        .setDescription("Show a user's avatar")
         .addUserOption(option => 
             option.setName('target')
-                .setDescription('User yang ingin dilihat avatarnya')
+                .setDescription('The user whose avatar you want to view')
                 .setRequired(false)
         ),
     async execute(interaction) {
         const user = interaction.options.getUser('target') || interaction.user;
         
         const embed = new EmbedBuilder()
-            .setTitle(`Avatar ${user.tag}`)
+            .setTitle(`${user.tag}'s Avatar`)
             .setImage(user.displayAvatarURL({ size: 1024, extension: 'png' }))
-            .setColor('#2b2d31');
+            .setColor('#9000FF');
 
         await interaction.reply({ embeds: [embed] });
     },

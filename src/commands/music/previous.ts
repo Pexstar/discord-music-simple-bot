@@ -4,8 +4,8 @@ import { ExtendedClient } from '../../structures/ExtendedClient';
 
 const command: Command = {
     data: new SlashCommandBuilder()
-        .setName('pause')
-        .setDescription('Pause the currently playing song'),
+        .setName('previous')
+        .setDescription('Play the previous track'),
     async execute(interaction) {
         const member = interaction.member as GuildMember;
 
@@ -17,15 +17,16 @@ const command: Command = {
         const client = interaction.client as ExtendedClient;
         const queue = client.queues.get(interaction.guildId!);
 
-        if (!queue || !queue.currentTrack) {
-            await interaction.reply({ embeds: [new EmbedBuilder().setColor('#ED4245').setDescription('❌ There is no song currently playing.')], ephemeral: true });
+        if (!queue) {
+            await interaction.reply({ embeds: [new EmbedBuilder().setColor('#ED4245').setDescription('❌ The queue is empty.')], ephemeral: true });
             return;
         }
 
-        if (queue.pause()) {
-            await interaction.reply({ embeds: [new EmbedBuilder().setColor('#9000FF').setDescription('⏸️ Music paused.')] });
+        const success = queue.playPrevious();
+        if (success) {
+            await interaction.reply({ embeds: [new EmbedBuilder().setColor('#9000FF').setDescription('⏮️ Playing the previous song.')] });
         } else {
-            await interaction.reply({ embeds: [new EmbedBuilder().setColor('#ED4245').setDescription('❌ Music is already paused or cannot be paused.')], ephemeral: true });
+            await interaction.reply({ embeds: [new EmbedBuilder().setColor('#ED4245').setDescription('❌ No previous song history found.')], ephemeral: true });
         }
     },
 };

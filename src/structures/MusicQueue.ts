@@ -8,7 +8,7 @@ import {
     VoiceConnection, 
     VoiceConnectionStatus 
 } from '@discordjs/voice';
-import { GuildMember, TextChannel } from 'discord.js';
+import { GuildMember, TextChannel, EmbedBuilder } from 'discord.js';
 import { spawn } from 'child_process';
 import { resolve } from 'path';
 import os from 'os';
@@ -41,6 +41,9 @@ export class MusicQueue {
     public lastTrack: Track | null = null;
     public textChannel: TextChannel | null = null;
     public autoplay: boolean = false;
+    public loopMode: 0 | 1 | 2 = 0; // 0: Off, 1: Track, 2: Queue
+    public history: Track[] = [];
+    public skipped: boolean = false;
     
     private guildId: string;
     private ytdlpProc: any = null;
@@ -90,11 +93,29 @@ export class MusicQueue {
     public async playNext() {
         this.killProcesses();
         
+        const wasSkipped = this.skipped;
+        this.skipped = false;
+        
+        if (this.currentTrack) {
+            // Save to history
+            this.history.push(this.currentTrack);
+            if (this.history.length > 50) this.history.shift();
+
+            // Handle loop modes if not skipped
+            if (!wasSkipped) {
+                if (this.loopMode === 1) {
+                    this.tracks.unshift(this.currentTrack);
+                } else if (this.loopMode === 2) {
+                    this.tracks.push(this.currentTrack);
+                }
+            }
+        }
+
         if (this.tracks.length === 0) {
             this.currentTrack = null;
             
             if (!this.autoplay && this.textChannel) {
-                this.textChannel.send('⏹️ Antrian habis. Bot akan keluar dari voice channel jika tidak ada aktivitas.');
+                this.textChannel.send({ embeds: [new EmbedBuilder().setColor('#9000FF').setDescription('⏹️ Queue ended. The bot will leave the voice channel due to inactivity.')] });
             }
             return;
         }
@@ -109,7 +130,7 @@ export class MusicQueue {
         }
 
         if (this.textChannel) {
-            this.textChannel.send(`🎶 Now playing: **${track.title}** by *${track.author}* (Requested by: ${track.requestedBy})`);
+            this.textChannel.send({ embeds: [new EmbedBuilder().setColor('#9000FF').setDescription(`🎶 Now playing: **${track.title}** by *${track.author}* (Requested by: ${track.requestedBy})`)] });
         }
 
         try {
@@ -152,13 +173,14 @@ export class MusicQueue {
             this.player.play(resource);
         } catch (error) {
             console.error('[MusicQueue Play Error]', error);
-            if (this.textChannel) this.textChannel.send('❌ Gagal memutar lagu.');
+            if (this.textChannel) this.textChannel.send({ embeds: [new EmbedBuilder().setColor('#ED4245').setDescription('❌ Failed to play the song.')] });
             this.playNext();
         }
     }
 
     public stop() {
         this.tracks = [];
+        this.history = [];
         this.currentTrack = null;
         this.killProcesses();
         if (this.player.state.status !== AudioPlayerStatus.Idle) {
@@ -172,10 +194,34 @@ export class MusicQueue {
 
     public skip() {
         if (this.player.state.status === AudioPlayerStatus.Playing || this.player.state.status === AudioPlayerStatus.Paused) {
+            this.skipped = true;
             this.player.stop(true); // Triggers Idle -> playNext()
             return true;
         }
         return false;
+    }
+
+    public playPrevious() {
+        if (this.history.length === 0) return false;
+        
+        // Remove the last track from history
+        const prevTrack = this.history.pop()!;
+        
+        // If we are currently playing, push it back to the start of the queue so it plays next
+        if (this.currentTrack) {
+            this.tracks.unshift(this.currentTrack);
+        }
+        
+        // Put the previous track at the very front of the queue
+        this.tracks.unshift(prevTrack);
+        
+        // Nullify currentTrack so playNext doesn't add it to history again
+        this.currentTrack = null;
+        
+        // Force playNext via stop()
+        this.skipped = true;
+        this.player.stop(true);
+        return true;
     }
 
     public pause() {
@@ -270,7 +316,7 @@ export class MusicQueue {
                     } else if (this.player.state.status === AudioPlayerStatus.Idle) {
                         // All attempts failed and player is idle
                         if (this.textChannel) {
-                            this.textChannel.send('⏹️ Autoplay gagal menemukan lagu terkait. Antrian habis.');
+                            this.textChannel.send({ embeds: [new EmbedBuilder().setColor('#9000FF').setDescription('⏹️ Autoplay failed to find related songs. Queue ended.')] });
                         }
                         this.autoplay = false;
                     }

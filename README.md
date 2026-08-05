@@ -1,97 +1,97 @@
 # Discord Music Bot 🎵
 
-Bot Discord Music super stabil dan responsif, dibangun dengan Node.js, TypeScript, dan `@discordjs/voice`. Bot ini menggunakan pipeline `yt-dlp` -> `ffmpeg` -> `Discord Voice` yang sangat mulus dan mendukung sistem antrian (queue) lengkap beserta fitur **Autoplay cerdas** bergaya YouTube Music!
+A super stable and responsive Discord Music Bot built with Node.js, TypeScript, and `@discordjs/voice`. This bot uses a `yt-dlp` -> `ffmpeg` -> `Discord Voice` pipeline which is extremely smooth and supports a complete queue system along with a smart **Autoplay** feature similar to YouTube Music!
 
-## 🌟 Fitur Utama
-- Kualitas audio jernih dan anti-lag
-- **Sistem Antrian (Queue):** Putar puluhan lagu berurutan.
-- **Autoplay Cerdas:** Saat antrian habis, bot akan mencari lagu serupa dari *YouTube Mix* dan memutarnya otomatis. (Lagu disiapkan secara transparan di belakang layar agar pemutaran *seamless* tanpa jeda!).
-- **Commands Lengkap:** `/play`, `/stop`, `/skip`, `/pause`, `/resume`, `/queue`, `/nowplaying`, `/volume`, `/shuffle`, `/autoplay`, dll.
-
----
-
-## 🔑 Cara Mendapatkan Token & Client ID Bot
-Sebelum menjalankan bot, Anda perlu mendaftarkannya di Discord Developer Portal:
-1. Buka [Discord Developer Portal](https://discord.com/developers/applications) dan login.
-2. Klik tombol **New Application** di pojok kanan atas, beri nama bot Anda, lalu klik **Create**.
-3. **Mendapatkan Client ID:**
-   - Di menu **General Information**, temukan/copy **Application ID**. Ini adalah `CLIENT_ID` Anda.
-   - *(Note: `GUILD_ID` adalah ID Server Discord Anda. Anda bisa mendapatkannya dengan mengaktifkan Developer Mode di seting aplikasi Discord, lalu klik kanan nama server > Copy Server ID. **Anda juga bisa mengosongkan `GUILD_ID` di file `.env`** jika ingin bot Anda bersifat global dan bisa digunakan di banyak server sekaligus).*
-4. **Mendapatkan Token:**
-   - Masuk ke menu **Bot** (panel kiri).
-   - Klik **Reset Token** untuk memunculkan token. **Copy dan simpan rahasia token ini**. Ini adalah `DISCORD_TOKEN` Anda.
-5. **Mengaktifkan Privileged Intents (Penting!):**
-   - Masih di halaman **Bot**, scroll ke bawah ke bagian **Privileged Gateway Intents**.
-   - Wajib nyalakan **Message Content Intent** (dan opsi lainnya jika diperlukan).
-   - Klik **Save Changes**.
-6. **Mengundang Bot ke Server Anda:**
-   - Masuk ke menu **OAuth2 > URL Generator**.
-   - Di bagian Scopes, centang **bot** dan **applications.commands**.
-   - Di bagian Bot Permissions, centang **Send Messages**, **Connect**, dan **Speak**.
-   - Copy URL yang dihasilkan di bagian bawah, buka URL tersebut di tab browser baru, lalu undang bot ke server Anda!
+## 🌟 Key Features
+- Clear and lag-free audio quality
+- **Queue System:** Play dozens of songs consecutively.
+- **Smart Autoplay:** When the queue ends, the bot will search for related songs from *YouTube Mix* and play them automatically. (Songs are prepared seamlessly in the background so there are no interruptions!).
+- **Complete Commands:** `/play`, `/stop`, `/skip`, `/pause`, `/resume`, `/queue`, `/nowplaying`, `/volume`, `/shuffle`, `/autoplay`, etc.
 
 ---
 
-## 💻 Cara Menjalankan di PC (Windows / Linux / MacOS)
+## 🔑 How to Get Bot Token & Client ID
+Before running the bot, you need to register it on the Discord Developer Portal:
+1. Open the [Discord Developer Portal](https://discord.com/developers/applications) and log in.
+2. Click the **New Application** button in the top right corner, name your bot, and click **Create**.
+3. **Getting the Client ID:**
+   - In the **General Information** menu, find/copy the **Application ID**. This is your `CLIENT_ID`.
+   - *(Note: `GUILD_ID` is your Discord Server ID. You can get it by enabling Developer Mode in Discord app settings, then right-click your server name > Copy Server ID. **You can also leave `GUILD_ID` empty in the `.env` file** if you want your bot to be global and available across multiple servers).*
+4. **Getting the Token:**
+   - Go to the **Bot** menu (left panel).
+   - Click **Reset Token** to reveal the token. **Copy and keep this token secret**. This is your `DISCORD_TOKEN`.
+5. **Enabling Privileged Intents (Important!):**
+   - Still on the **Bot** page, scroll down to the **Privileged Gateway Intents** section.
+   - You MUST enable **Message Content Intent** (and other options if necessary).
+   - Click **Save Changes**.
+6. **Inviting the Bot to Your Server:**
+   - Go to the **OAuth2 > URL Generator** menu.
+   - Under Scopes, check **bot** and **applications.commands**.
+   - Under Bot Permissions, check **Send Messages**, **Connect**, and **Speak**.
+   - Copy the generated URL at the bottom, open it in a new browser tab, and invite the bot to your server!
 
-1. **Install Node.js** (Minimal versi 18+)
-2. **Clone Repository ini:**
+---
+
+## 💻 How to Run on PC (Windows / Linux / MacOS)
+
+1. **Install Node.js** (Minimum version 18+)
+2. **Clone this Repository:**
    ```bash
-   git clone <URL_GITHUB_ANDA>
+   git clone <YOUR_GITHUB_URL>
    cd discord-music
    ```
 3. **Install Dependencies:**
    ```bash
    npm install
    ```
-4. **Siapkan Environment Variables:**
-   - Copy file `.env.example` dan ubah namanya menjadi `.env`
-   - Isi `DISCORD_TOKEN`, `CLIENT_ID`, dan `GUILD_ID` di dalam file `.env` tersebut.
-5. **Jalankan Bot:**
+4. **Setup Environment Variables:**
+   - Copy the `.env.example` file and rename it to `.env`
+   - Fill in `DISCORD_TOKEN`, `CLIENT_ID`, and `GUILD_ID` inside the `.env` file.
+5. **Run the Bot:**
    ```bash
    npm run dev
    ```
 
 ---
 
-## 📱 Cara Menjalankan 24/7 di HP Android (Termux)
+## 📱 How to Run 24/7 on Android Phone (Termux)
 
-Anda bisa meng-host bot ini langsung dari saku Anda menggunakan HP Android!
+You can host this bot right from your pocket using an Android phone!
 
-1. **Download & Install Termux** (WAJIB dari [F-Droid](https://f-droid.org/packages/com.termux/), jangan dari Play Store).
-2. **Buka Termux dan siapkan environment:**
+1. **Download & Install Termux** (MUST be from [F-Droid](https://f-droid.org/packages/com.termux/), do not use the Play Store version).
+2. **Open Termux and setup the environment:**
    ```bash
    pkg update && pkg upgrade -y
    pkg install nodejs python ffmpeg git -y
    ```
-3. **Clone Repository ini:**
+3. **Clone this Repository:**
    ```bash
-   git clone <URL_GITHUB_ANDA>
+   git clone <YOUR_GITHUB_URL>
    cd discord-music-simple-bot
    ```
 4. **Install Dependencies:**
-   Jalankan perintah di bawah ini. (Jika muncul pesan error merah tentang `ffmpeg-static` saat proses install, abaikan saja karena itu wajar di Termux dan instalasi akan tetap dilanjutkan).
+   Run the command below. (If you see a red error message regarding `ffmpeg-static` during installation, just ignore it as it is normal in Termux and the installation will proceed).
    ```bash
    npm install
    ```
-5. **Siapkan File .env:**
+5. **Setup .env File:**
    ```bash
    cp .env.example .env
    nano .env
    ```
-   *(Isi token bot Anda, lalu tekan `Ctrl + X`, lalu `Y`, lalu `Enter` untuk menyimpan).*
-6. **Jalankan Bot:**
+   *(Fill in your bot token, then press `Ctrl + X`, then `Y`, then `Enter` to save).*
+6. **Run the Bot:**
    ```bash
    npm run dev
    ```
 
-**⚠️ Tips untuk HP Android:**
-Sistem operasi HP (Xiaomi, Oppo, Vivo, Samsung, dll) biasanya membunuh aplikasi di latar belakang untuk menghemat baterai. Agar bot tetap hidup 24/7 di Termux walau layar dimatikan:
-- Matikan fitur **Battery Optimization** untuk aplikasi Termux.
-- Kunci (*Lock*) aplikasi Termux di *Recent Apps*.
+**⚠️ Tips for Android Phones:**
+Mobile operating systems (Xiaomi, Oppo, Vivo, Samsung, etc.) usually kill background apps to save battery. To keep the bot running 24/7 in Termux even when the screen is off:
+- Disable **Battery Optimization** for the Termux app.
+- **Lock** the Termux app in *Recent Apps*.
 
-### 🔧 Troubleshooting Termux
-- **Error Instalasi Modul / Exec format error:**
-  Pastikan Anda menjalankan `npm install` biasa. Meskipun muncul pesan gagal di modul `ffmpeg-static`, instalasi paket lain akan tetap berlanjut (karena kita sudah menjadikannya *optional*). Bot akan **langsung beradaptasi** menggunakan `ffmpeg` dari Termux Anda jika dijalankan di Android.
-- **Tidak dapat menemukan yt-dlp:**
-  Pastikan instalasi `youtube-dl-exec` berhasil. Bot tidak lagi melakukan *hardcode* pada file `yt-dlp.exe` milik Windows, melainkan otomatis menggunakan binary Linux/Termux bawaan package.
+### 🔧 Termux Troubleshooting
+- **Module Installation Error / Exec format error:**
+  Make sure you run standard `npm install`. Even if an error appears for the `ffmpeg-static` module, other packages will continue installing (since it is marked as *optional*). The bot will **automatically adapt** and use the `ffmpeg` installed from Termux when run on Android.
+- **Cannot find yt-dlp:**
+  Make sure `youtube-dl-exec` installed successfully. The bot no longer hardcodes the `yt-dlp.exe` Windows file; it automatically uses the native Linux/Termux binary provided by the package.

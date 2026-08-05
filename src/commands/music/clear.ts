@@ -4,8 +4,8 @@ import { ExtendedClient } from '../../structures/ExtendedClient';
 
 const command: Command = {
     data: new SlashCommandBuilder()
-        .setName('pause')
-        .setDescription('Pause the currently playing song'),
+        .setName('clear')
+        .setDescription('Clear all songs from the queue'),
     async execute(interaction) {
         const member = interaction.member as GuildMember;
 
@@ -17,16 +17,15 @@ const command: Command = {
         const client = interaction.client as ExtendedClient;
         const queue = client.queues.get(interaction.guildId!);
 
-        if (!queue || !queue.currentTrack) {
-            await interaction.reply({ embeds: [new EmbedBuilder().setColor('#ED4245').setDescription('❌ There is no song currently playing.')], ephemeral: true });
+        if (!queue || queue.tracks.length === 0) {
+            await interaction.reply({ embeds: [new EmbedBuilder().setColor('#ED4245').setDescription('❌ The queue is already empty.')], ephemeral: true });
             return;
         }
 
-        if (queue.pause()) {
-            await interaction.reply({ embeds: [new EmbedBuilder().setColor('#9000FF').setDescription('⏸️ Music paused.')] });
-        } else {
-            await interaction.reply({ embeds: [new EmbedBuilder().setColor('#ED4245').setDescription('❌ Music is already paused or cannot be paused.')], ephemeral: true });
-        }
+        const count = queue.tracks.length;
+        queue.tracks = []; // Clear the tracks array
+
+        await interaction.reply({ embeds: [new EmbedBuilder().setColor('#9000FF').setDescription(`🗑️ Successfully cleared **${count}** songs from the queue.`)] });
     },
 };
 

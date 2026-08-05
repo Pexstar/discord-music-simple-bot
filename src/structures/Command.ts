@@ -3,4 +3,5 @@ import { ChatInputCommandInteraction, SlashCommandBuilder, SlashCommandOptionsOn
 export interface Command {
     data: SlashCommandBuilder | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'> | SlashCommandOptionsOnlyBuilder;
     execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
+    category?: string;
 }

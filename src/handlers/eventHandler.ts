@@ -2,8 +2,8 @@ import { ExtendedClient } from '../structures/ExtendedClient';
 import { ActivityType } from 'discord.js';
 
 export const loadEvents = (client: ExtendedClient) => {
-    client.once('ready', async () => {
-        console.log(`Logged in as ${client.user?.tag}!`);
+    client.once('clientReady', async () => {
+        console.log(`Ready! Logged in as ${client.user?.tag}`);
 
         const activities = [
             { name: '🎵 /play to listen to music', type: ActivityType.Custom },

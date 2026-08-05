@@ -11,7 +11,7 @@ const command: Command = {
         const queue = client.queues.get(interaction.guildId!);
 
         if (!queue || !queue.currentTrack) {
-            await interaction.reply({ content: '❌ Tidak ada lagu yang sedang diputar.', ephemeral: true });
+            await interaction.reply({ embeds: [new EmbedBuilder().setColor('#ED4245').setDescription('❌ There is no song currently playing.')], ephemeral: true });
             return;
         }
 
@@ -24,7 +24,7 @@ const command: Command = {
                 { name: 'Author', value: track.author, inline: true },
                 { name: 'Requested By', value: track.requestedBy, inline: true }
             )
-            .setColor('#2b2d31');
+            .setColor('#9000FF');
 
         await interaction.reply({ embeds: [embed] });
     },

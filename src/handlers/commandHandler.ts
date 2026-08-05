@@ -21,6 +21,7 @@ export const loadCommands = async (client: ExtendedClient) => {
             const command: Command = require(filePath).default;
             
             if ('data' in command && 'execute' in command) {
+                command.category = folder;
                 client.commands.set(command.data.name, command);
                 commandsArray.push(command.data.toJSON());
             } else {

@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, GuildMember, TextChannel } from 'discord.js';
+import { SlashCommandBuilder, GuildMember, TextChannel, EmbedBuilder } from 'discord.js';
 import { Command } from '../../structures/Command';
 import { ExtendedClient } from '../../structures/ExtendedClient';
 import { spawn } from 'child_process';
@@ -12,12 +12,23 @@ function isYouTubeURL(query: string): boolean {
     return /(?:youtube\.com|youtu\.be|music\.youtube\.com)/.test(query);
 }
 
-// Search YouTube via yt-dlp and return video URL
-async function searchYouTube(query: string): Promise<{ url: string; title: string; author: string } | null> {
+function isPlaylistURL(query: string): boolean {
+    return isYouTubeURL(query) && /[?&]list=/.test(query);
+}
+
+// Search YouTube via yt-dlp and return video URLs
+async function searchYouTube(query: string): Promise<{ url: string; title: string; author: string }[] | null> {
     return new Promise((resolve) => {
-        const args = isYouTubeURL(query) 
-            ? ['--print', '%(webpage_url)s|%(title)s|%(channel)s', '--no-playlist', query]
-            : ['--print', '%(webpage_url)s|%(title)s|%(channel)s', '--no-playlist', '--default-search', 'ytsearch1', query];
+        const isPlaylist = isPlaylistURL(query);
+        let args: string[] = [];
+
+        if (isPlaylist) {
+            args = ['--print', '%(id)s|%(title)s|%(channel)s', '--flat-playlist', '--playlist-items', '1-50', query];
+        } else if (isYouTubeURL(query)) {
+            args = ['--print', '%(id)s|%(title)s|%(channel)s', '--no-playlist', query];
+        } else {
+            args = ['--print', '%(id)s|%(title)s|%(channel)s', '--no-playlist', '--default-search', 'ytsearch1', query];
+        }
 
         const proc = spawn(YTDLP_PATH, args, { stdio: ['pipe', 'pipe', 'pipe'] });
         let stdout = '';
@@ -30,9 +41,25 @@ async function searchYouTube(query: string): Promise<{ url: string; title: strin
                 resolve(null);
                 return;
             }
+            
+            const results: { url: string; title: string; author: string }[] = [];
             const lines = stdout.trim().split('\n');
-            const [url, title, author] = lines[0].split('|');
-            resolve({ url, title: title || 'Unknown', author: author || 'Unknown' });
+            
+            for (const line of lines) {
+                if (!line.trim()) continue;
+                const [id, title, author] = line.split('|');
+                
+                // Construct the video URL from ID (or use as-is if it's already a URL somehow)
+                const url = (id.startsWith('http') || id.startsWith('www')) ? id : `https://www.youtube.com/watch?v=${id}`;
+                
+                results.push({ 
+                    url, 
+                    title: title && title !== 'NA' ? title : 'Unknown', 
+                    author: author && author !== 'NA' ? author : 'Unknown' 
+                });
+            }
+            
+            resolve(results.length > 0 ? results : null);
         });
     });
 }
@@ -51,7 +78,7 @@ const command: Command = {
         const member = interaction.member as GuildMember;
 
         if (!member.voice.channel) {
-            await interaction.reply({ content: '❌ Kamu harus masuk ke voice channel dulu!', ephemeral: true });
+            await interaction.reply({ embeds: [new EmbedBuilder().setColor('#ED4245').setDescription('❌ You must be in a voice channel first!')], ephemeral: true });
             return;
         }
 
@@ -61,29 +88,37 @@ const command: Command = {
 
         try {
             console.log(`[Play] Searching: ${query}`);
-            const result = await searchYouTube(query);
+            const results = await searchYouTube(query);
 
-            if (!result) {
-                await interaction.editReply('❌ Lagu tidak ditemukan.');
+            if (!results || results.length === 0) {
+                await interaction.editReply({ embeds: [new EmbedBuilder().setColor('#ED4245').setDescription('❌ Song or playlist not found.')] });
                 return;
             }
 
-            console.log(`[Play] Found: ${result.title} by ${result.author}`);
+            console.log(`[Play] Found: ${results.length} tracks`);
 
             await queue.connect(member, interaction.channel as TextChannel);
             
-            queue.addTrack({
-                url: result.url,
-                title: result.title,
-                author: result.author,
-                requestedBy: interaction.user.tag
-            });
+            let addedCount = 0;
+            for (const track of results) {
+                queue.addTrack({
+                    url: track.url,
+                    title: track.title,
+                    author: track.author,
+                    requestedBy: interaction.user.tag
+                });
+                addedCount++;
+            }
 
-            await interaction.editReply(`🎶 Berhasil ditambahkan ke antrian: **${result.title}** by *${result.author}*`);
+            if (addedCount > 1) {
+                await interaction.editReply({ embeds: [new EmbedBuilder().setColor('#9000FF').setDescription(`🎶 Successfully added to the queue: **${addedCount}** songs from the playlist.`)] });
+            } else {
+                await interaction.editReply({ embeds: [new EmbedBuilder().setColor('#9000FF').setDescription(`🎶 Successfully added to the queue: **${results[0].title}** by *${results[0].author}*`)] });
+            }
 
         } catch (e: any) {
             console.error('[Play Error]', e);
-            await interaction.editReply('❌ Terjadi error saat memutar lagu.');
+            await interaction.editReply({ embeds: [new EmbedBuilder().setColor('#ED4245').setDescription('❌ An error occurred while playing the song.')] });
         }
     },
 };
